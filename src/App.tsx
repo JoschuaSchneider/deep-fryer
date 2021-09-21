@@ -118,7 +118,7 @@ function App() {
 
   return (
     <div className="bg-gray-50">
-      <div className="flex sticky top-0 space-x-4 bg-white/75 z-10 py-1 px-2">
+      <div className="flex sticky top-0 z-10 py-1 px-2 gap-4 w-full bg-white/75">
         <input
           type="range"
           min="0"
@@ -140,6 +140,12 @@ function App() {
             img {index}
           </button>
         ))}
+        <a
+          href="https://github.com/JoschuaSchneider/deep-fryer"
+          className="ml-auto text-blue-500 hover:text-blue-600 hover:underline"
+        >
+          Source
+        </a>
       </div>
       <div className="flex flex-wrap">
         <div className="relative">
