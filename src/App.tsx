@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { TransformerNames } from './compute.worker'
+import ComputeWorker from './compute.worker?worker'
 
 import chair from './public/chair.webp'
 import meme from './public/meme.jpg'
@@ -47,12 +48,7 @@ const applyImageDataToCanvas = (
   context?.putImageData(imageData, 0, 0)
 }
 
-const workers: Worker[] = transformations.map(
-  () =>
-    new Worker(new URL('./compute.worker.ts', import.meta.url), {
-      type: 'module'
-    })
-)
+const workers: Worker[] = transformations.map(() => new ComputeWorker())
 
 function useDebouncedValue<T>(value: T, delay = 100) {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
