@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import { TransformerNames } from './compute.worker'
 import ComputeWorker from './compute.worker?worker'
 
@@ -76,6 +82,20 @@ function App() {
   const [threshhold, setThreshhold] = useState(150)
   const debouncedThreshold = useDebouncedValue(threshhold)
 
+  const loadImageFromFile = useCallback((file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setImage(e.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+  }, [])
+
+  const onSelectImage = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      loadImageFromFile(event.target.files[0])
+    }
+  }, [])
+
   useEffect(() => {
     const load = async () => {
       const imageData = await imageToImageData(image)
@@ -88,6 +108,9 @@ function App() {
   }, [canvasRef.current, image])
 
   useEffect(() => {
+    /**
+     * Memory leak factory :)
+     */
     for (let i = 0; i < transformations.length; i++) {
       workers[i].addEventListener('message', (message) => {
         const resRef = resultRefs.current[i]
@@ -96,6 +119,19 @@ function App() {
         }
       })
     }
+
+    document.addEventListener('paste', (event) => {
+      const items = event.clipboardData?.items ?? []
+
+      if (items[0]) {
+        if (/^image\/(p?jpeg|gif|png|webp)$/i.test(items[0].type)) {
+          const file = items[0].getAsFile()
+          if (file) {
+            loadImageFromFile(file)
+          }
+        }
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -115,16 +151,6 @@ function App() {
       applyImageDataToCanvas(imageData, canvasRef.current)
     }
   }, [imageData, canvasRef])
-
-  const onSelectImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImage(e.target?.result as string)
-      }
-      reader.readAsDataURL(event.target.files[0])
-    }
-  }
 
   return (
     <div className="bg-gray-50">
@@ -150,11 +176,10 @@ function App() {
             preset {index}
           </button>
         ))}
-        <input
-          type="file"
-          className="border-l border-gray-100 pl-3"
-          onChange={onSelectImage}
-        />
+        <div className="flex items-center pl-3 space-x-2 border-l border-gray-100">
+          <p>Paste or select a file:</p>
+          <input type="file" className="" onChange={onSelectImage} />
+        </div>
         <a
           href="https://github.com/JoschuaSchneider/deep-fryer"
           className="ml-auto text-blue-500 hover:text-blue-600 hover:underline"
