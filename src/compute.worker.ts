@@ -1,3 +1,16 @@
+export type Transformer = (
+  imageData: ImageData,
+  threshold: number
+) => Promise<ImageData>
+
+export type TransformerNames = keyof typeof transformations
+
+export type WorkerMessage = {
+  imageData: ImageData
+  transformName: keyof typeof transformations
+  threshold: number
+}
+
 const grayscaleLuminanceHelper = (
   imageData: ImageData,
   resultImageData: ImageData
@@ -261,16 +274,3 @@ self.addEventListener('message', (message: MessageEvent<WorkerMessage>) => {
     postMessage(result)
   })
 })
-
-export type Transformer = (
-  imageData: ImageData,
-  threshold: number
-) => Promise<ImageData>
-
-export type TransformerNames = keyof typeof transformations
-
-export type WorkerMessage = {
-  imageData: ImageData
-  transformName: keyof typeof transformations
-  threshold: number
-}

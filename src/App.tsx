@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { TransformerNames } from './compute.worker'
 import ComputeWorker from './compute.worker?worker'
 
@@ -116,9 +116,19 @@ function App() {
     }
   }, [imageData, canvasRef])
 
+  const onSelectImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImage(e.target?.result as string)
+      }
+      reader.readAsDataURL(event.target.files[0])
+    }
+  }
+
   return (
     <div className="bg-gray-50">
-      <div className="flex sticky top-0 z-10 py-1 px-2 gap-4 w-full bg-white/75">
+      <div className="flex sticky top-0 z-10 gap-4 py-1 px-2 w-full bg-white/75">
         <input
           type="range"
           min="0"
@@ -137,9 +147,14 @@ function App() {
             className="px-2 bg-green-100 rounded border border-gray-100"
             onClick={() => setImage(image)}
           >
-            img {index}
+            preset {index}
           </button>
         ))}
+        <input
+          type="file"
+          className="border-l border-gray-100 pl-3"
+          onChange={onSelectImage}
+        />
         <a
           href="https://github.com/JoschuaSchneider/deep-fryer"
           className="ml-auto text-blue-500 hover:text-blue-600 hover:underline"
